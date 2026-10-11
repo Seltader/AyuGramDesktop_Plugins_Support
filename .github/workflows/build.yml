@@ -1,0 +1,74 @@
+name: Build Windows Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows x64
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+      - name: Prepare directories
+        run: |
+          mkdir %userprofile%\TBuild\Libraries
+          mklink /d %GITHUB_WORKSPACE%\TBuild %userprofile%\TBuild
+          echo TBUILD=%GITHUB_WORKSPACE%\TBuild>>%GITHUB_ENV%
+          echo LibrariesPath=%GITHUB_WORKSPACE%\TBuild\Libraries\win64>>%GITHUB_ENV%
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          path: ${{ env.TBUILD }}\AyuGramDesktop
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Setup MSVC developer prompt
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Cache libraries
+        id: cache-libs
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.LibrariesPath }}
+            !${{ env.LibrariesPath }}\cache_keys
+          key: ${{ runner.os }}-x64-libs-${{ hashFiles('**/prepare.py') }}
+          restore-keys: |
+            ${{ runner.os }}-x64-libs-
+
+      - name: Prepare third-party libraries
+        run: |
+          cd %TBUILD%\AyuGramDesktop\Telegram\build\prepare
+          python prepare.py silent
+
+      - name: Configure CMake
+        run: |
+          cd %TBUILD%\AyuGramDesktop\Telegram
+          call configure.bat x64 -D TDESKTOP_API_ID=2040 -D TDESKTOP_API_HASH=b18441a1ff607e10a989891a5462e627 -D CMAKE_CONFIGURATION_TYPES=Release
+
+      - name: Build AyuGram
+        run: |
+          cmake --build %TBUILD%\AyuGramDesktop\out --config Release --target Telegram --parallel
+
+      - name: Upload AyuGram Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AyuGram-Desktop-Windows-x64
+          path: |
+            ${{ env.TBUILD }}\AyuGramDesktop\out\Release\AyuGram.exe
+            ${{ env.TBUILD }}\AyuGramDesktop\out\Release\Telegram.exe
+          if-no-files-found: warn
