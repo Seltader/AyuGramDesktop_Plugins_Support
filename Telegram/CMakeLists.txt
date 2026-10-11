@@ -66,6 +66,10 @@ endif()
 
 set_target_properties(Telegram PROPERTIES AUTOMOC ON)
 
+if (MSVC)
+    target_compile_options(Telegram PRIVATE /bigobj /Zm300)
+endif()
+
 target_link_libraries(Telegram
 PRIVATE
     tdesktop::lib_fido2

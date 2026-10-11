@@ -62,6 +62,8 @@ jobs:
 
       - name: Build AyuGram
         run: |
+          set "CL=/bigobj /Zm300 %CL%"
+          set "_CL_=/bigobj /Zm300 %_CL_%"
           cmake --build %TBUILD%\AyuGramDesktop\out --config Release --target Telegram --parallel
 
       - name: Upload AyuGram Artifact
