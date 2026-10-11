@@ -15,6 +15,7 @@
 - Translator
 - Media preview & quick reaction on force click (macOS)
 - Enhanced appearance
+- **Plugin Support (.plugin)** in Python, compatible with exteraGram and AyuGram (Contributed by [@CallMeSenya](https://t.me/CallMeSenya))
 
 And many more. Check out our [Documentation](https://docs.ayugram.one/desktop/).
 

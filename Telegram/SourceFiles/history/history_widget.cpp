@@ -223,6 +223,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ayu/utils/telegram_helpers.h"
 #include "ayu/features/message_shot/message_shot.h"
 #include "ayu/features/forward/ayu_forward.h"
+#include "ayu/plugins/plugin_manager.h"
 #include "boxes/abstract_box.h"
 
 
@@ -5962,6 +5963,14 @@ void HistoryWidget::sendTextWithTags(
 		bool useWebPageDraft,
 		Api::SendOptions options,
 		Fn<void()> done) {
+	if (!AyuPlugins::PluginManager::Instance().onSendMessage(
+			session().account().index(),
+			textWithTags.text,
+			textWithTags.tags,
+			replyTo().messageId.bare)) {
+		return;
+	}
+
 	if (!options.scheduled) {
 		_cornerButtons.clearReplyReturns();
 	}

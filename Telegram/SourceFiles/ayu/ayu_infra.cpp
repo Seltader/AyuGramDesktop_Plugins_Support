@@ -16,6 +16,7 @@
 #include "lang/lang_instance.h"
 #include "ui/chat/chat_style_radius.h"
 #include "utils/rc_manager.h"
+#include "ayu/plugins/plugin_manager.h"
 
 #ifdef Q_OS_WIN
 #include "ayu/utils/windows_utils.h"
@@ -75,6 +76,7 @@ void init() {
 	initWorker();
 	initRCManager();
 	initTranslator();
+	AyuPlugins::PluginManager::Instance().init();
 }
 
 }

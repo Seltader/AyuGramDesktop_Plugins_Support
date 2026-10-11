@@ -163,6 +163,8 @@ set(ayugram_files
         ayu/ui/settings/settings_main.h
         ayu/ui/settings/settings_other.cpp
         ayu/ui/settings/settings_other.h
+        ayu/ui/settings/settings_plugins.cpp
+        ayu/ui/settings/settings_plugins.h
         ayu/ui/settings/filters/settings_filters_list.cpp
         ayu/ui/settings/filters/settings_filters_list.h
         ayu/ui/settings/filters/per_dialog_filter.cpp
@@ -252,6 +254,9 @@ set(ayugram_files
         ayu/data/entities.h
         ayu/data/ayu_database.cpp
         ayu/data/ayu_database.h
+
+        ayu/plugins/plugin_manager.cpp
+        ayu/plugins/plugin_manager.h
 
         info/profile/info_profile_music_button.cpp
         info/profile/info_profile_music_button.h
