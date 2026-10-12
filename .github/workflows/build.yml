@@ -16,6 +16,12 @@ jobs:
         shell: cmd
 
     steps:
+      - name: Expand pagefile
+        shell: powershell
+        run: |
+          Set-CimInstance -Query "Select * from Win32_PageFileSetting" -Property @{InitialSize = 16384; MaximumSize = 32768} -ErrorAction SilentlyContinue
+          Get-CimInstance Win32_PageFileSetting
+
       - name: Prepare directories
         run: |
           mkdir %userprofile%\TBuild\Libraries
@@ -39,9 +45,9 @@ jobs:
         with:
           arch: x64
 
-      - name: Cache libraries
+      - name: Restore cache libraries
         id: cache-libs
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             ${{ env.LibrariesPath }}
@@ -55,16 +61,25 @@ jobs:
           cd %TBUILD%\AyuGramDesktop\Telegram\build\prepare
           python prepare.py silent
 
+      - name: Save cache libraries
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ${{ env.LibrariesPath }}
+            !${{ env.LibrariesPath }}\cache_keys
+          key: ${{ runner.os }}-x64-libs-${{ hashFiles('**/prepare.py') }}
+
       - name: Configure CMake
         run: |
           cd %TBUILD%\AyuGramDesktop\Telegram
-          call configure.bat x64 -D TDESKTOP_API_ID=2040 -D TDESKTOP_API_HASH=b18441a1ff607e10a989891a5462e627 -D CMAKE_CONFIGURATION_TYPES=Release
+          call configure.bat x64 -Thost=x64 -D TDESKTOP_API_ID=2040 -D TDESKTOP_API_HASH=b18441a1ff607e10a989891a5462e627 -D CMAKE_CONFIGURATION_TYPES=Release
 
       - name: Build AyuGram
         run: |
           set "CL=/bigobj /Zm300 %CL%"
           set "_CL_=/bigobj /Zm300 %_CL_%"
-          cmake --build %TBUILD%\AyuGramDesktop\out --config Release --target Telegram --parallel
+          cmake --build %TBUILD%\AyuGramDesktop\out --config Release --target Telegram --parallel 2
 
       - name: Upload AyuGram Artifact
         uses: actions/upload-artifact@v4
